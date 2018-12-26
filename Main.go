@@ -31,7 +31,7 @@ func initialize(token string) *TBot.Bot {
 	return bot
 }
 
-func sendDab(bot *TBot.Bot, recipient *TBot.User, filename string) {
+func sendDab(bot *TBot.Bot, recipient *TBot.Chat, filename string) {
 	log.Printf("[Dab] %-13s requested by %s", filename, recipient.Username)
 
 	file := &TBot.Video{File: TBot.FromDisk("./dabs/" + filename + ".mp4")}
@@ -43,27 +43,27 @@ func main() {
 
 	// Handle dabs
 	bot.Handle("/dab", func(m *TBot.Message) {
-		sendDab(bot, m.Sender, "dab")
+		sendDab(bot, m.Chat, "dab")
 	})
 
 	bot.Handle("/rev_dab", func(m *TBot.Message) {
-		sendDab(bot, m.Sender, "rev_dab")
+		sendDab(bot, m.Chat, "rev_dab")
 	})
 
 	bot.Handle("/space_dab", func(m *TBot.Message) {
-		sendDab(bot, m.Sender, "space_dab")
+		sendDab(bot, m.Chat, "space_dab")
 	})
 
 	bot.Handle("/rev_space_dab", func(m *TBot.Message) {
-		sendDab(bot, m.Sender, "rev_space_dab")
+		sendDab(bot, m.Chat, "rev_space_dab")
 	})
 
 	bot.Handle("/ht", func(m *TBot.Message) {
-		sendDab(bot, m.Sender, "ht")
+		sendDab(bot, m.Chat, "ht")
 	})
 
 	bot.Handle("/ella", func(m *TBot.Message) {
-		sendDab(bot, m.Sender, "ella")
+		sendDab(bot, m.Chat, "ella")
 	})
 
 	// Handle poster requests
@@ -71,17 +71,17 @@ func main() {
 		args := strings.Split(m.Payload, ".")
 
 		if len(args) != 2 {
-			bot.Send(m.Sender, fmt.Sprintf("Wrong number of arguments. Required: 2. Found: %v", len(args)))
+			bot.Send(m.Chat, fmt.Sprintf("Wrong number of arguments. Required: 2. Found: %v", len(args)))
 			return
 		}
 		log.Printf("[Poster] request received by %s with args \"%s\"", m.Sender.Username, args)
 
 		args[0] = url.PathEscape(strings.TrimSpace(args[0]))
 		args[1] = url.PathEscape(strings.TrimSpace(args[1]))
-		escapedUrl := fmt.Sprintf("https://generate.felunka.de/generate.php?text=%s&text2=%s", args[0], args[1])
+		escapedUrl := fmt.Sprintf("https://generate.felunka.de/generate.php?text=%s&text2=%s&color=c", args[0], args[1])
 
 		file := &TBot.Photo{File: TBot.FromURL(escapedUrl)}
-		bot.Send(m.Sender, file)
+		bot.Send(m.Chat, file)
 	})
 
 	// Register listener for term signal and gracefully shut down
