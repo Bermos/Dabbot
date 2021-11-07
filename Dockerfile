@@ -15,4 +15,6 @@ FROM alpine
 WORKDIR /app
 COPY --from=backend /build/dabbot ./dabbot
 
+VOLUME /app/dabs
+
 ENTRYPOINT ["./dabbot"]
