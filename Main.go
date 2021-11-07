@@ -78,7 +78,7 @@ func main() {
 
 		args[0] = url.PathEscape(strings.TrimSpace(args[0]))
 		args[1] = url.PathEscape(strings.TrimSpace(args[1]))
-		escapedUrl := fmt.Sprintf("https://generate.felunka.de/generate.php?text=%s&text2=%s&color=c", args[0], args[1])
+		escapedUrl := fmt.Sprintf("https://punkt.felunka.de/generate.php?text=%s&text2=%s&color=c", args[0], args[1])
 
 		file := &TBot.Photo{File: TBot.FromURL(escapedUrl)}
 		bot.Send(m.Chat, file)
