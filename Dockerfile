@@ -1,7 +1,18 @@
-FROM scratch
+# Build dabbot
+FROM golang:1.17.1-alpine AS backend
 
-COPY ca-certificates.crt /etc/ssl/certs/
-COPY main /
-COPY dabs /dabs
+WORKDIR /build
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
 
-CMD ["/main"]
+COPY Main.go Main.go
+RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o dabbot .
+
+# Deploy stage
+FROM alpine
+
+WORKDIR /app
+COPY --from=backend /build/dabbot ./dabbot
+
+ENTRYPOINT ["./dabbot"]
