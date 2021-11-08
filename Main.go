@@ -14,7 +14,7 @@ import (
 )
 
 func initialize(token string) *TBot.Bot {
-	log.Println("Initializing bot...")
+	log.Println("INFO - Initializing bot...")
 
 	bot, err := TBot.NewBot(TBot.Settings{
 		Token:  token,
@@ -23,10 +23,9 @@ func initialize(token string) *TBot.Bot {
 
 	if err != nil {
 		log.Fatal(err)
-		os.Exit(1)
 	}
 
-	log.Println("Initialize successful")
+	log.Println("INFO - Initialize successful")
 
 	return bot
 }
@@ -39,7 +38,11 @@ func sendDab(bot *TBot.Bot, recipient *TBot.Chat, filename string) {
 }
 
 func main() {
-	bot := initialize(os.Getenv("TOKEN"))
+	tokenEnv := os.Getenv("TOKEN")
+	if tokenEnv == "" {
+		log.Fatal("ERROR - No TOKEN environment var set")
+	}
+	bot := initialize(tokenEnv)
 
 	// Handle dabs
 	bot.Handle("/dab", func(m *TBot.Message) {
@@ -78,10 +81,14 @@ func main() {
 
 		args[0] = url.PathEscape(strings.TrimSpace(args[0]))
 		args[1] = url.PathEscape(strings.TrimSpace(args[1]))
-		escapedUrl := fmt.Sprintf("https://punkt.felunka.de/generate.php?text=%s&text2=%s&color=c", args[0], args[1])
+		escapedUrl := fmt.Sprintf("https://punkt.felunka.de/generate.php?text=%s&text2=%s&color=c", url.QueryEscape(args[0]), url.QueryEscape(args[1]))
 
 		file := &TBot.Photo{File: TBot.FromURL(escapedUrl)}
-		bot.Send(m.Chat, file)
+		_, err := bot.Send(m.Chat, file)
+		if err != nil {
+			log.Println("ERROR - Poster could not be sent. See error below.")
+			log.Println(err)
+		}
 	})
 
 	// Register listener for term signal and gracefully shut down
@@ -89,11 +96,11 @@ func main() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		log.Println("Term signal received. Shutting down...")
+		log.Println("INFO - Term signal received. Shutting down...")
 		bot.Stop()
 		os.Exit(0)
 	}()
 
-	log.Print("Starting bot")
+	log.Print("INFO - Starting bot")
 	bot.Start()
 }
