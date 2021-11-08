@@ -37,4 +37,4 @@ jobs:
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
     - name: Deploy Stage
-      run: curl --request POST '${{ env.PORTAINER_URL }}/${{ secrets.REGISTRY_USERNAME }}'
+      run: curl --request POST '${{ env.PORTAINER_URL }}/${{ secrets.SERVICE_UPDATE_WEBHOOK }}'
