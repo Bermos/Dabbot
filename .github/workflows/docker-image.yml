@@ -7,6 +7,7 @@ on:
 env:
   REGISTRY: reg.bermos.dev
   IMAGE_NAME: ${{ github.repository }}
+  VERSION: $(date -u "+%y.%V.%u%H%M%S")
 
 jobs:
   build-and-push:
@@ -22,14 +23,11 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
     
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag reg.bermos.dev/dabbot:$(date +%s) --tag reg.bermos.dev/dabbot:latest
-    
     - name: Build and push Docker image
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
       with:
         context: .
         push: true
         tags: |
-          $(date +%s)
+          ${{ env.VERSION }}
           latest
