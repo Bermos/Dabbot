@@ -34,3 +34,6 @@ jobs:
         tags: |
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.date.outputs.date }}
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+    - name: Deploy Stage
+      run: curl --request POST '${{ secrets.REGISTRY_USERNAME }}'
