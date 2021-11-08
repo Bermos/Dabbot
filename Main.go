@@ -57,9 +57,9 @@ func loadDabs(bot *TBot.Bot) {
 		}
 
 		bot.Handle(fmt.Sprintf("/%s", filename), func(m *TBot.Message) {
-			sendDab(bot, m.Chat, file.Name())
+			sendDab(bot, m.Chat, fmt.Sprintf("%s%s", filename, fileExt))
 		})
-		log.Printf("DEBUG - Dab '%s' loaded and registered", filename)
+		log.Printf("DEBUG - Dab '/%s' loaded and registered", filename)
 	}
 }
 
