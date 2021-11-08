@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -33,8 +35,32 @@ func initialize(token string) *TBot.Bot {
 func sendDab(bot *TBot.Bot, recipient *TBot.Chat, filename string) {
 	log.Printf("[Dab] %-13s requested by %s", filename, recipient.Username)
 
-	file := &TBot.Video{File: TBot.FromDisk("./dabs/" + filename + ".mp4")}
+	file := &TBot.Video{File: TBot.FromDisk("./dabs/" + filename)}
 	bot.Send(recipient, file)
+}
+
+func loadDabs(bot *TBot.Bot) {
+	files, err := ioutil.ReadDir("./dabs/")
+
+	if err != nil {
+		log.Fatal("ERROR - Could not read dab dir.")
+	}
+
+	for i, file := range files {
+		log.Printf("DEBUG - Loading dab %d: %s", i, file.Name())
+		fileExt := filepath.Ext(file.Name())
+		filename := strings.TrimSuffix(file.Name(), fileExt)
+
+		if fileExt != ".mp4" {
+			log.Printf("ERROR - dab not loaded, file extension is not '.mp4' but '%s'", fileExt)
+			continue
+		}
+
+		bot.Handle(fmt.Sprintf("/%s", filename), func(m *TBot.Message) {
+			sendDab(bot, m.Chat, file.Name())
+		})
+		log.Printf("DEBUG - Dab '%s' loaded and registered", filename)
+	}
 }
 
 func main() {
@@ -44,30 +70,8 @@ func main() {
 	}
 	bot := initialize(tokenEnv)
 
-	// Handle dabs
-	bot.Handle("/dab", func(m *TBot.Message) {
-		sendDab(bot, m.Chat, "dab")
-	})
-
-	bot.Handle("/rev_dab", func(m *TBot.Message) {
-		sendDab(bot, m.Chat, "rev_dab")
-	})
-
-	bot.Handle("/space_dab", func(m *TBot.Message) {
-		sendDab(bot, m.Chat, "space_dab")
-	})
-
-	bot.Handle("/rev_space_dab", func(m *TBot.Message) {
-		sendDab(bot, m.Chat, "rev_space_dab")
-	})
-
-	bot.Handle("/ht", func(m *TBot.Message) {
-		sendDab(bot, m.Chat, "ht")
-	})
-
-	bot.Handle("/ella", func(m *TBot.Message) {
-		sendDab(bot, m.Chat, "ella")
-	})
+	// Load and register dabs to handle
+	loadDabs(bot)
 
 	// Handle poster requests
 	bot.Handle("/poster", func(m *TBot.Message) {

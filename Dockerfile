@@ -1,5 +1,5 @@
 # Build dabbot
-FROM golang:1.17.1-alpine AS backend
+FROM golang:1.17.3-alpine AS backend
 
 WORKDIR /build
 COPY go.mod .
