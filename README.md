@@ -1,4 +1,4 @@
-# Dabbot
+# Dabbot [![Docker Image Build](https://github.com/Bermos/Dabbot/actions/workflows/docker-image.yml/badge.svg)](https://github.com/Bermos/Dabbot/actions/workflows/docker-image.yml)
 
 ## Why
 Did you really expect a reason for why one would need a dabbot?

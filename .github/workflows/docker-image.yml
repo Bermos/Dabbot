@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Docker Image Build
 
 on:
   push:
@@ -36,5 +36,5 @@ jobs:
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.date.outputs.date }}
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
-    - name: Deploy Stage
+    - name: Deploy image to Docker instance
       run: curl --request POST '${{ env.PORTAINER_URL }}/${{ secrets.SERVICE_UPDATE_WEBHOOK }}'
