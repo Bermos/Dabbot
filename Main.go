@@ -63,12 +63,37 @@ func loadDabs(bot *TBot.Bot) {
 	}
 }
 
-func main() {
+func getToken() string {
 	tokenEnv := os.Getenv("TOKEN")
-	if tokenEnv == "" {
-		log.Fatal("ERROR - No TOKEN environment var set")
+	tokenFileEnv := os.Getenv("TOKEN_FILE")
+
+	// TOKEN set, use that
+	if tokenEnv != "" {
+		if tokenFileEnv != "" {
+			log.Print("WARNING - TOKEN and TOKEN_FILE env set, TOKEN will take precedence.")
+		}
+		return tokenEnv
 	}
-	bot := initialize(tokenEnv)
+
+	// TOKEN and TOKEN_FILE not set, no token -> crash
+	if tokenFileEnv == "" {
+		log.Fatal("ERROR - No TOKEN or TOKEN_FILE environment var set")
+	}
+
+	token, err := ioutil.ReadFile(tokenFileEnv)
+	if err != nil {
+		log.Fatal("ERROR - TOKEN_FILE env - ", err)
+	}
+
+	if string(token) == "" {
+		log.Fatal("ERROR - Token read from TOKEN_FILE file is empty")
+	}
+
+	return string(token)
+}
+
+func main() {
+	bot := initialize(getToken())
 
 	// Load and register dabs to handle
 	loadDabs(bot)
