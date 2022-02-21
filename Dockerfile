@@ -6,7 +6,7 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 
-COPY Main.go Main.go
+COPY main.go main.go
 RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o dabbot .
 
 # Deploy stage
