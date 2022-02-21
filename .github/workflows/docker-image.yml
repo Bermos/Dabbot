@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: dabbot
+  IMAGE_NAME: ${{ github.repository }}
   PORTAINER_URL: https://admin.bermos.dev/api/webhooks
 
 jobs:
