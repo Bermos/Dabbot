@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -63,7 +64,7 @@ func loadDabs(bot *TBot.Bot) {
 	}
 }
 
-func getToken() string {
+func getToken() (string, error) {
 	tokenEnv := os.Getenv("TOKEN")
 	tokenFileEnv := os.Getenv("TOKEN_FILE")
 
@@ -72,28 +73,32 @@ func getToken() string {
 		if tokenFileEnv != "" {
 			log.Print("WARNING - TOKEN and TOKEN_FILE env set, TOKEN will take precedence.")
 		}
-		return tokenEnv
+		return tokenEnv, nil
 	}
 
 	// TOKEN and TOKEN_FILE not set, no token -> crash
 	if tokenFileEnv == "" {
-		log.Fatal("ERROR - No TOKEN or TOKEN_FILE environment var set")
+		return "", errors.New("no TOKEN or TOKEN_FILE environment var set")
 	}
 
 	token, err := ioutil.ReadFile(tokenFileEnv)
 	if err != nil {
-		log.Fatal("ERROR - TOKEN_FILE env - ", err)
+		return "", errors.New(fmt.Sprintf("TOKEN_FILE env - %v", err))
 	}
 
 	if string(token) == "" {
-		log.Fatal("ERROR - Token read from TOKEN_FILE file is empty")
+		return "", errors.New("token read from TOKEN_FILE file is empty")
 	}
 
-	return string(token)
+	return string(token), nil
 }
 
 func main() {
-	bot := initialize(getToken())
+	token, err := getToken()
+	if err != nil {
+		log.Fatalf("ERROR - %v", err)
+	}
+	bot := initialize(token)
 
 	// Load and register dabs to handle
 	loadDabs(bot)
