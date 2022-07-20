@@ -15,6 +15,8 @@ import (
 	TBot "gopkg.in/tucnak/telebot.v2"
 )
 
+var bot *TBot.Bot
+
 func initialize(token string) *TBot.Bot {
 	log.Println("INFO - Initializing bot...")
 
@@ -88,11 +90,16 @@ func main() {
 		escapedUrl := fmt.Sprintf("https://punkt.felunka.de/generate.php?text=%s&text2=%s&color=c", url.QueryEscape(args[0]), url.QueryEscape(args[1]))
 
 		file := &TBot.Photo{File: TBot.FromURL(escapedUrl)}
+		log.Println(escapedUrl)
+		log.Println(file)
+		log.Println(m.Chat)
 		_, err := bot.Send(m.Chat, file)
 		if err != nil {
 			log.Println("ERROR - Poster could not be sent. See error below.")
 			log.Println(err)
 		}
+
+		handlePosterRequest(m)
 	})
 
 	// Register listener for term signal and gracefully shut down
@@ -107,4 +114,28 @@ func main() {
 
 	log.Print("INFO - Starting bot")
 	bot.Start()
+}
+
+func handlePosterRequest(m *TBot.Message) {
+	args := strings.Split(m.Payload, ".")
+
+	if len(args) != 2 {
+		bot.Send(m.Chat, fmt.Sprintf("Wrong number of arguments. Required: 2. Found: %v", len(args)))
+		return
+	}
+	log.Printf("[Poster] request received by %s with args \"%s\"", m.Sender.Username, args)
+
+	args[0] = url.PathEscape(strings.TrimSpace(args[0]))
+	args[1] = url.PathEscape(strings.TrimSpace(args[1]))
+	escapedUrl := fmt.Sprintf("https://punkt.felunka.de/generate.php?text=%s&text2=%s&color=c", url.QueryEscape(args[0]), url.QueryEscape(args[1]))
+
+	file := &TBot.Photo{File: TBot.FromURL(escapedUrl)}
+	log.Println(escapedUrl)
+	log.Println(file)
+	log.Println(m.Chat)
+	_, err := bot.Send(m.Chat, file)
+	if err != nil {
+		log.Println("ERROR - Poster could not be sent. See error below.")
+		log.Println(err)
+	}
 }
