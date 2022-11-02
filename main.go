@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
@@ -33,15 +32,22 @@ func initialize(token string) *TBot.Bot {
 	return bot
 }
 
-func sendDab(bot *TBot.Bot, recipient *TBot.Chat, filename string) {
-	log.Printf("[Dab] %-13s requested by %s", filename, recipient.Username)
+func sendVideo(bot *TBot.Bot, recipient *TBot.Chat, filename string) {
+	log.Printf("[Video] %-13s requested by %s", filename, recipient.Username)
 
 	file := &TBot.Video{File: TBot.FromDisk("./dabs/" + filename)}
-	bot.Send(recipient, file)
+	_, _ = bot.Send(recipient, file)
 }
 
-func loadDabs(bot *TBot.Bot) {
-	files, err := ioutil.ReadDir("./dabs/")
+func sendPicture(bot *TBot.Bot, recipient *TBot.Chat, filename string) {
+	log.Printf("[Picture] %-13s requested by %s", filename, recipient.Username)
+
+	file := &TBot.Video{File: TBot.FromDisk("./dabs/" + filename)}
+	_, _ = bot.Send(recipient, file)
+}
+
+func loadFiles(bot *TBot.Bot) {
+	files, err := os.ReadDir("./dabs/")
 
 	if err != nil {
 		log.Fatal("ERROR - Could not read dab dir.")
@@ -52,15 +58,23 @@ func loadDabs(bot *TBot.Bot) {
 		fileExt := filepath.Ext(file.Name())
 		filename := strings.TrimSuffix(file.Name(), fileExt)
 
-		if fileExt != ".mp4" {
-			log.Printf("ERROR - dab not loaded, file extension is not '.mp4' but '%s'", fileExt)
-			continue
+		switch fileExt {
+		case ".mp4":
+			bot.Handle(fmt.Sprintf("/%s", filename), func(m *TBot.Message) {
+				sendVideo(bot, m.Chat, fmt.Sprintf("%s%s", filename, fileExt))
+			})
+			log.Printf("DEBUG - Video '/%s' loaded and registered", filename)
+
+		case ".jpg":
+			bot.Handle(fmt.Sprintf("/%s", filename), func(m *TBot.Message) {
+				sendPicture(bot, m.Chat, fmt.Sprintf("%s%s", filename, fileExt))
+			})
+			log.Printf("DEBUG - Picture '/%s' loaded and registered", filename)
+
+		default:
+			log.Printf("ERROR - file not loaded, file extension is not recognised but '%s'", fileExt)
 		}
 
-		bot.Handle(fmt.Sprintf("/%s", filename), func(m *TBot.Message) {
-			sendDab(bot, m.Chat, fmt.Sprintf("%s%s", filename, fileExt))
-		})
-		log.Printf("DEBUG - Dab '/%s' loaded and registered", filename)
 	}
 }
 
@@ -81,7 +95,7 @@ func getToken() (string, error) {
 		return "", errors.New("no TOKEN or TOKEN_FILE environment var set")
 	}
 
-	token, err := ioutil.ReadFile(tokenFileEnv)
+	token, err := os.ReadFile(tokenFileEnv)
 	if err != nil {
 		return "", errors.New(fmt.Sprintf("TOKEN_FILE env - %v", err))
 	}
@@ -100,15 +114,15 @@ func main() {
 	}
 	bot := initialize(token)
 
-	// Load and register dabs to handle
-	loadDabs(bot)
+	// Load and register files to handle
+	loadFiles(bot)
 
 	// Handle poster requests
 	bot.Handle("/poster", func(m *TBot.Message) {
 		args := strings.Split(m.Payload, ".")
 
 		if len(args) != 2 {
-			bot.Send(m.Chat, fmt.Sprintf("Wrong number of arguments. Required: 2. Found: %v", len(args)))
+			_, _ = bot.Send(m.Chat, fmt.Sprintf("Wrong number of arguments. Required: 2. Found: %v", len(args)))
 			return
 		}
 		log.Printf("[Poster] request received by %s with args \"%s\"", m.Sender.Username, args)

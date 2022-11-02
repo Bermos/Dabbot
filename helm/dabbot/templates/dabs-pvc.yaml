@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    {{- include "dabbot.labels" . | nindent 4 }}
+  name: {{ include "dabbot.fullname" . }}-dabs-pvc
+spec:
+  {{- if .Values.persistance.storageClassName }}
+  storageClassName: {{ .Values.persistance.storageClassName }}
+  {{- end }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.persistance.storage }}

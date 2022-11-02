@@ -1,0 +1,3 @@
+Congrats, {{ include "dabbot.fullname" . }} setup and running. (Presumably)
+Only one thing left to do:
+Fill the /app/dabs directory with the dabs you want to serve and restart the bot.
