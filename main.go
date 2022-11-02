@@ -42,7 +42,7 @@ func sendVideo(bot *TBot.Bot, recipient *TBot.Chat, filename string) {
 func sendPicture(bot *TBot.Bot, recipient *TBot.Chat, filename string) {
 	log.Printf("[Picture] %-13s requested by %s", filename, recipient.Username)
 
-	file := &TBot.Video{File: TBot.FromDisk("./dabs/" + filename)}
+	file := &TBot.Photo{File: TBot.FromDisk("./dabs/" + filename)}
 	_, _ = bot.Send(recipient, file)
 }
 
