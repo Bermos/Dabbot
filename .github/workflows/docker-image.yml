@@ -57,33 +57,3 @@ jobs:
         tags: |
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.date.outputs.date }}
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-
-  helm-publish:
-    runs-on: ubuntu-latest
-    needs: build-and-test
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
-      - name: Install Helm
-        uses: azure/setup-helm@v1
-
-      - name: login to acr using helm
-        run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ${{ env.GCR_IMAGE }} --username ${{ github.repository_owner }} --password-stdin
-
-      - name: save helm chart to local registry
-        run: |
-          helm chart save ${{ github.workspace }}/src/azure-vote-helm-chart/ ${{ env.GCR_IMAGE }}:${{ github.sha }}
-
-      - name: publish chart to acr
-        run: |
-          helm chart push ${{ env.GCR_IMAGE }}:${{ github.sha }}
