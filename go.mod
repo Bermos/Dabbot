@@ -1,6 +1,6 @@
 module Dabbot
 
-go 1.17
+go 1.18
 
 require gopkg.in/tucnak/telebot.v2 v2.5.0
 
